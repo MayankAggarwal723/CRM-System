@@ -66,12 +66,7 @@ body {
   box-sizing: border-box;
 }
 
-h1,
-h2 {
-  font-family: var(--heading);
-  font-weight: 500;
-  color: var(--text-h);
-}
+
 
 h1 {
   font-size: 56px;
@@ -90,9 +85,6 @@ h2 {
   @media (max-width: 1024px) {
     font-size: 20px;
   }
-}
-p {
-  margin: 0;
 }
 
 code,
