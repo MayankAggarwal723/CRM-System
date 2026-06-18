@@ -10,6 +10,7 @@ import {
   BarChart3,
   Users,
 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 
 const features = [
@@ -19,11 +20,12 @@ const features = [
   { icon: Users, label: "Team", sub: "Collaboration" },
 ];
 
+
 // icon + two-line wordmark, side by side — used top-left on the dark panel
 function BrandLockupCompact({ iconSize = "w-auto h-24", }) {
   return (
     <div className="flex items-center justify-center gap-3">
-      <img src="src/assets/logo.png" alt="YNRS logo" className={`${iconSize} object-contain`} />
+      <img src="../../../logo.png" alt="YNRS logo" className={`${iconSize} object-contain`} />
     </div>
   );
 }
@@ -33,7 +35,7 @@ function BrandLockupCentered({ iconSize = "w-auto h-24",}) {
   return (
     <div className="flex flex-col items-center">
       <div className="flex items-center gap-2">
-        <img src="src/assets/logo.png" alt="YNRS logo" className={`${iconSize} object-contain`} />
+        <img src="../../../logo.png" alt="YNRS logo" className={`${iconSize} object-contain`} />
       </div>
     
     </div>
@@ -85,6 +87,8 @@ function RoleCard({ active, icon: Icon, title, onClick }) {
 }
 
 export default function LoginSplitScreen() {
+  const navigate = useNavigate();
+
   const [role, setRole] = useState("employee");
   const [loginId, setLoginId] = useState("");
   const [password, setPassword] = useState("");
@@ -92,9 +96,20 @@ export default function LoginSplitScreen() {
   const [rememberMe, setRememberMe] = useState(false);
 
   const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log({ role, loginId, password, rememberMe });
-    // call your login API here
+  e.preventDefault();
+
+      console.log({
+        role,
+        loginId,
+        password,
+        rememberMe,
+      });
+
+      if (role === "admin") {
+        navigate("/admin/dashboard");
+      } else {
+        navigate("/employee/dashboard");
+      }
   };
 
   return (
@@ -230,19 +245,32 @@ export default function LoginSplitScreen() {
             </div>
 
             <div className="flex items-center justify-between text-sm">
-              <label className="flex items-center gap-2 text-slate-600">
+              <label className="flex items-center gap-2 text-slate-600 cursor-pointer">
                 <input
-                    type="checkbox"
-                    checked={rememberMe}
-                    onChange={(e) => setRememberMe(e.target.checked)}
-                    className="
-                        w-5 h-5
-                        rounded
-                        border-2 border-gray-300
-                        bg-white
-                        accent-blue-600
-                        cursor-pointer
-                    "
+                  type="checkbox"
+                  checked={rememberMe}
+                  onChange={(e) => setRememberMe(e.target.checked)}
+                  className="
+                    w-5 h-5
+                    appearance-none
+                    bg-white
+                    border-2
+                    border-gray-300
+                    rounded
+                    cursor-pointer
+                    checked:bg-blue-600
+                    checked:border-blue-600
+                    after:content-['✓']
+                    after:text-white
+                    after:text-xs
+                    after:flex
+                    after:items-center
+                    after:justify-center
+                    after:w-full
+                    after:h-full
+                    after:opacity-0
+                    checked:after:opacity-100
+                  "
                 />
                 Remember Me
               </label>
