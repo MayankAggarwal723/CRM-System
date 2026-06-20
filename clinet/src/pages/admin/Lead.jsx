@@ -1,72 +1,100 @@
-  import { useState, useEffect, } from "react";
-  import { Link, useLocation } from "react-router-dom";
-  import {
-    LayoutGrid, Users, Flag, Phone, LogIn, FileText, Settings, Search, Calendar, Bell,
-    Sun, Moon, Plus, ArrowRight, Activity, User, LogOut,
-  } from "lucide-react";
-  import {
-    AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip,
-    ResponsiveContainer, PieChart, Pie, Cell,
-  } from "recharts";
-  import { getDashboardData } from "../../services/dashboardService";
+import { useState, useEffect, useRef } from "react";
+import { Link, useLocation } from "react-router-dom";
+import {
+  LayoutGrid, Users, Flag, Phone, LogIn, FileText, Settings, Search, Calendar, Bell,
+  Sun, Moon, Plus, ChevronDown, ChevronLeft, ChevronRight,
+  Eye, Pencil, Trash2, Filter, User, LogOut, CheckCircle2, XCircle,
+} from "lucide-react";
 
-  // ─── shared nav ────────────────────────────────────────────────────────────
-  const navItems = [
-    { label: "Dashboard",           icon: LayoutGrid, path: "/admin/dashboard" },
-    { label: "Employees",           icon: Users,      path: "/admin/employee"  },
-    { label: "Leads",               icon: Flag,       path: "/admin/leads"     },
-    { label: "Call Details",        icon: Phone,      path: "/admin/calls"     },
-    { label: "Login / Logout Logs", icon: LogIn,      path: "/admin/logs"      },
-    { label: "Task & Follow-ups",   icon: FileText,   path: "/admin/tasks"     },
-    { label: "Settings",            icon: Settings,   path: "/admin/settings"  },
-  ];
+// ─── shared nav (same paths as Dashboard / Employee) ───────────────────────
+const navItems = [
+  { label: "Dashboard",           icon: LayoutGrid, path: "/admin/dashboard" },
+  { label: "Employees",           icon: Users,      path: "/admin/employee"  },
+  { label: "Leads",               icon: Flag,       path: "/admin/leads"     },
+  { label: "Call Details",        icon: Phone,      path: "/admin/calls"     },
+  { label: "Login / Logout Logs", icon: LogIn,      path: "/admin/logs"      },
+  { label: "Task & Follow-ups",   icon: FileText,   path: "/admin/tasks"     },
+  { label: "Settings",            icon: Settings,   path: "/admin/settings"  },
+];
 
-  // ─── stat icon map ──────────────────────────────────────────────────────────
-  const iconMap = {
-    users:    { icon: Users,    bg: "bg-blue-100",    color: "text-blue-600"    },
-    activity: { icon: Activity, bg: "bg-emerald-100", color: "text-emerald-600" },
-    leads:    { icon: User,     bg: "bg-purple-100",  color: "text-purple-600"  },
-    calls:    { icon: Phone,    bg: "bg-orange-100",  color: "text-orange-600"  },
-  };
-  const defaultIconStyle = { icon: Users, bg: "bg-slate-100", color: "text-slate-500" };
+// ─── stat icon map ──────────────────────────────────────────────────────────
+const iconMap = {
+  total:     { icon: Users,        bg: "bg-blue-100",    color: "text-blue-600"    },
+  new:       { icon: User,         bg: "bg-emerald-100", color: "text-emerald-600" },
+  followup:  { icon: Phone,        bg: "bg-purple-100",  color: "text-purple-600"  },
+  converted: { icon: CheckCircle2, bg: "bg-orange-100",  color: "text-orange-600"  },
+  lost:      { icon: XCircle,      bg: "bg-red-100",     color: "text-red-600"     },
+};
+const defaultStats = [
+  { label: "Total Leads", value: "0", change: "", icon: "total",     trend: "up"   },
+  { label: "New Leads",   value: "0", change: "", icon: "new",       trend: "up"   },
+  { label: "Follow-Ups",  value: "0", change: "", icon: "followup",  trend: "up"   },
+  { label: "Converted",   value: "0", change: "", icon: "converted", trend: "up"   },
+  { label: "Lost",        value: "0", change: "", icon: "lost",      trend: "down" },
+];
 
-  const defaultStats = [
-    { label: "Total Employees",  value: "0", change: "", icon: "users"    },
-    { label: "Active Today",     value: "0", change: "", icon: "activity" },
-    { label: "Today's Leads",    value: "0", change: "", icon: "leads"    },
-    { label: "Calls Made Today", value: "0", change: "", icon: "calls"    },
-  ];
+// ─── status pill colors ─────────────────────────────────────────────────────
+const statusStyles = {
+  New:            "bg-blue-100 text-blue-700",
+  Now:            "bg-blue-100 text-blue-700",
+  "Follow-Up":    "bg-purple-100 text-purple-700",
+  Converted:      "bg-emerald-100 text-emerald-700",
+  "Lost/Closed":  "bg-red-100 text-red-700",
+};
+const defaultStatusStyle = "bg-slate-100 text-slate-600";
 
-  // Chart skeleton — keeps axes visible when there's no real data yet
-  const chartSkeleton = {
-    week:  ["6 Jul","7 Jul","8 Jul","9 Jul","10 Jul","11 Jul","12 Jul"].map(l => ({ label: l, value: 0 })),
-    month: ["Week 1","Week 2","Week 3","Week 4"].map(l => ({ label: l, value: 0 })),
-    year:  ["Jan","Mar","May","Jul","Sep","Nov"].map(l => ({ label: l, value: 0 })),
-  };
+// ─── filter options ─────────────────────────────────────────────────────────
+const STATUS_OPTIONS   = ["All", "New", "Now", "Follow-Up", "Converted", "Lost/Closed"];
 
-  const defaultLeadStatus = [
-    { label: "New Leads",    value: 0, color: "#2563eb" },
-    { label: "Connected",    value: 0, color: "#16a34a" },
-    { label: "Follow-ups",   value: 0, color: "#c026d3" },
-    { label: "Converted",    value: 0, color: "#f97316" },
-    { label: "Lost / Closed",value: 0, color: "#ef4444" },
-  ];
+const ROWS_OPTIONS     = [10, 25, 50];
 
-  const statusStyles = {
-    New:         "bg-blue-100 text-blue-700",
-    Contacted:   "bg-emerald-100 text-emerald-700",
-    "Follow up": "bg-purple-100 text-purple-700",
-    Converted:   "bg-orange-100 text-orange-700",
-  };
-  const defaultStatusStyle = "bg-slate-100 text-slate-600";
+// ─── tiny helpers ────────────────────────────────────────────────────────────
+function FilterSelect({ label, value, options, onChange }) {
+  return (
+    <div className="relative">
+      <select
+        value={value}
+        onChange={e => onChange(e.target.value)}
+        className="appearance-none pl-3 pr-8 py-2 text-sm font-medium border border-slate-200 rounded-lg bg-white text-slate-700 cursor-pointer focus:outline-none focus:border-blue-400"
+      >
+        {options.map(o => <option key={o} value={o}>{label}: {o}</option>)}
+      </select>
+      <ChevronDown className="w-4 h-4 text-slate-400 absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none" />
+    </div>
+  );
+}
 
-  const rankColors = [
-    "bg-amber-100 text-amber-700",
-    "bg-emerald-100 text-emerald-700",
-    "bg-amber-100 text-amber-700",
-    "bg-red-100 text-red-600",
-  ];
-  const defaultRankColor = "bg-slate-100 text-slate-700";
+function Pagination({ current, total, onChange }) {
+  const pages = total <= 6
+    ? Array.from({ length: total }, (_, i) => i + 1)
+    : [1, 2, 3, ...(current > 4 ? ["..."] : []), ...(current > 3 && current < total - 2 ? [current] : []), "...", total];
+  const unique = [...new Map(pages.map((p, i) => [i, p])).values()];
+
+  return (
+    <div className="flex items-center gap-1">
+      <button onClick={() => onChange(Math.max(1, current - 1))} disabled={current === 1}
+        className="p-1.5 rounded-lg border border-slate-200 text-slate-500 disabled:opacity-40 hover:bg-slate-50">
+        <ChevronLeft className="w-4 h-4" />
+      </button>
+      {unique.map((p, i) =>
+        p === "..." ? (
+          <span key={`d${i}`} className="px-1 text-slate-400 text-sm">...</span>
+        ) : (
+          <button key={p} onClick={() => onChange(p)}
+            className={`w-8 h-8 text-sm rounded-lg font-medium ${
+              p === current ? "bg-blue-600 text-white" : "border border-slate-200 text-slate-600 hover:bg-slate-50"
+            }`}>
+            {p}
+          </button>
+        )
+      )}
+      <button onClick={() => onChange(Math.min(total, current + 1))} disabled={current === total}
+        className="p-1.5 rounded-lg border border-slate-200 text-slate-500 disabled:opacity-40 hover:bg-slate-50">
+        <ChevronRight className="w-4 h-4" />
+      </button>
+    </div>
+  );
+}
 
   // ─── sidebar (shared layout) ────────────────────────────────────────────────
   function Sidebar({ admin }) {
@@ -172,286 +200,406 @@
     );
   }
 
-  // ─── page ───────────────────────────────────────────────────────────────────
-  export default function AdminDashboard() {
-    const [range,      setRange]      = useState("week");
-    const [theme,      setTheme]      = useState("light");
-    const [admin,      setAdmin]      = useState({});
-    const [stats, setStats] = useState(defaultStats);
+// ─── page ────────────────────────────────────────────────────────────────────
+export default function Lead() {
+  const [theme,       setTheme]       = useState("light");
+  const [search,      setSearch]      = useState("");
+  const [status,      setStatus]      = useState("All");
+  const [source,      setSource]      = useState("All");
+  const [employeeFilter, setEmployeeFilter] = useState("All Employees");
+  const [page,        setPage]        = useState(1);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
 
-    const [performers, setPerformers] = useState([
-      {
-        name: "No Data",
-        leads: 0,
-        pct: 0,
-      },
-    ]);
+  const [admin,  setAdmin]  = useState({});
+  const [stats,  setStats]  = useState([]);
+  const [leads,  setLeads]  = useState([]);
+  const SOURCE_OPTIONS = [
+    "All",
+    ...new Set(
+        leads
+        .map((lead) => lead.leadSource)
+        .filter(Boolean)
+    ),
+    ];
+  const [total,  setTotal]  = useState(0);
+  const [loading, setLoading] = useState(true);
 
-    const [recentLeads, setRecentLeads] = useState([
-      {
-        name: "No Leads Yet",
-        phone: "-",
-        status: "New",
-        time: "-",
-      },
-    ]);
+  // Mocked pagination page-count to match the design (1, 2, 3 … 8) until a
+  // real /api/leads endpoint returns server-side total pages.
+  const totalPages = Math.max(
+    1,
+    Math.ceil(total / rowsPerPage)
+    );
+  const prevDepsRef = useRef();
 
-    const [leadStatus, setLeadStatus] = useState(defaultLeadStatus);
+  useEffect(() => {
+    let isActive = true;
 
-    const [chartData, setChartData] = useState(chartSkeleton.week);
-    const [refreshing, setRefreshing] = useState(false);
-    const [error,      setError]      = useState(null);
+    const fetchLeads = async () => {
+      if (!isActive) return;
+      setLoading(true);
 
-    useEffect(() => {
-  const load = async () => {
-    setRefreshing(true);
+      try {
+        setAdmin({
+          name: "Admin User",
+          role: "Super Admin",
+        });
 
-    try {
-      const data = await getDashboardData(range);
+        const response = await fetch(
+            `http://localhost:5000/api/leads?page=${page}&limit=${rowsPerPage}`
+            );
 
-      setAdmin(data.admin || {});
-      setStats(data.stats || []);
-      setPerformers(data.performers || []);
-      setRecentLeads(data.recentLeads || []);
-      setLeadStatus(data.leadStatus || []);
-      setChartData(data.chartData || []);
-      setError(null);
-    } catch (err) {
-      console.error("Dashboard API Error:", err);
-      setError("Couldn't load dashboard data. Please try again.");
-    } finally {
-      setRefreshing(false);
+            const result = await response.json();
+
+            if (!response.ok || !result.success) {
+                throw new Error(
+                    result.message || "Failed to load leads"
+                );
+                }
+
+            setLeads(result.data.leads || []);
+            setTotal(result.data.total || 0);
+
+        const statsData = result.data.stats || {};
+
+        setStats([
+        {
+            label: "Total Leads",
+            value: statsData.totalLeads,
+            icon: "total",
+            trend: "up",
+            change: "Live"
+        },
+        {
+            label: "New Leads",
+            value: statsData.newLeads,
+            icon: "new",
+            trend: "up",
+            change: "Live"
+        },
+        {
+            label: "Follow-Ups",
+            value: statsData.followUps,
+            icon: "followup",
+            trend: "up",
+            change: "Live"
+        },
+        {
+            label: "Converted",
+            value: statsData.converted,
+            icon: "converted",
+            trend: "up",
+            change: "Live"
+        },
+        {
+            label: "Lost",
+            value: statsData.lost,
+            icon: "lost",
+            trend: "down",
+            change: "Live"
+        }
+        ]);
+
+      } catch (err) {
+        if (!isActive) return;
+        console.error("Leads API Error:", err);
+
+        setLeads([]);
+        setStats([]);
+        setTotal(0);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    Promise.resolve().then(fetchLeads);
+
+    // Reset to page 1 when filters change
+    if (page !== 1 && (prevDepsRef.current &&
+        (prevDepsRef.current.search !== search || prevDepsRef.current.status !== status ||
+         prevDepsRef.current.source !== source || prevDepsRef.current.employeeFilter !== employeeFilter ||
+         prevDepsRef.current.rowsPerPage !== rowsPerPage))) {
+      setPage(1);
+      return;
     }
-  };
 
-  load();
-}, [range]);
+    prevDepsRef.current = { search, status, source, employeeFilter, rowsPerPage };
 
-    const totalLeads = leadStatus.reduce((sum, item) => sum + item.value, 0);
-    const hasChartData = chartData.length > 0 && chartData.some(d => Number(d.value) > 0);
-    const chartDisplayData = hasChartData ? chartData : (chartSkeleton[range] || chartSkeleton.week);
+    return () => {
+      isActive = false;
+    };
+  }, [page, rowsPerPage, search, status, source, employeeFilter]);
+
+    const filteredLeads = leads.filter((lead) => {
+    const searchValue = search.toLowerCase();
+
+    const matchesSearch =
+        lead.customer?.toLowerCase().includes(searchValue)||
+        lead.leadId?.toLowerCase().includes(searchValue) ||
+        lead.phone?.includes(search);
+
+    const matchesStatus =
+        status === "All" || lead.status === status;
+
+    const employeeName =
+        lead.employee?.name || lead.employee;
+
+    const matchesEmployee =
+        employeeFilter === "All Employees" ||
+        employeeName === employeeFilter;
+
+    const matchesSource =
+        source === "All" ||
+        lead.leadSource === source;
 
     return (
-      <div className="min-h-screen flex bg-slate-50 text-slate-900">
-        <Sidebar admin={admin} />
+        matchesSearch &&
+        matchesStatus &&
+        matchesEmployee &&
+        matchesSource
+    );
+    });
+  const start = total === 0 ? 0 : (page - 1) * rowsPerPage + 1;
+  const end   = Math.min(page * rowsPerPage, total);
+  const EMPLOYEE_OPTIONS = [
+  "All Employees",
+  ...new Set(
+    leads
+      .map((lead) => lead.employee?.name || lead.employee)
+      .filter(Boolean)
+  ),
+];
 
-        <main className="flex-1 ml-45 overflow-y-auto">
-          <div className="p-2 space-y-4">
-            {error && (
-              <div className="bg-red-50 text-red-700 text-xs rounded-lg px-4 py-3 border border-red-100">{error}</div>
-            )}
+  return (
+    <div className="min-h-screen flex bg-slate-50 text-slate-900">
+      <Sidebar admin={admin} />
 
-            {/* Header */}
-            <div className="flex flex-wrap items-center justify-between gap-4">
-              <div>
-                <h2 className="text-lg font-medium flex items-center gap-2">
-                  Welcome back, {admin.name || "Admin"}! <span>👋</span>
-                </h2>
-                <p className="text-sm text-slate-500 mt-0.5">
-                  Here&rsquo;s what&rsquo;s happening with your team today.
-                </p>
-              </div>
+      <main className="flex-1 ml-45 overflow-y-auto">
+        <div className="p-2 space-y-4">
 
-              <div className="flex items-center gap-3">
-                <div className="relative">
-                  <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-                  <input type="text" placeholder="Search anything..." className="pl-9 pr-4 py-2 w-56 text-sm rounded-lg border border-slate-200 outline-none focus:border-blue-400 bg-white" />
-                </div>
-                <button type="button" className="p-2.5 rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-50"><Calendar className="w-[18px] h-[18px]" /></button>
-                <button type="button" className="relative p-2.5 rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-50">
-                  <Bell className="w-[18px] h-[18px]" />
-                  <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-red-500" />
-                </button>
-                <div className="flex items-center bg-slate-100 rounded-full p-1">
-                  <button type="button" onClick={() => setTheme("light")} className={`p-1.5 rounded-full ${theme === "light" ? "bg-white shadow text-amber-500" : "text-slate-400"}`}><Sun className="w-4 h-4" /></button>
-                  <button type="button" onClick={() => setTheme("dark")}  className={`p-1.5 rounded-full ${theme === "dark"  ? "bg-white shadow text-slate-700" : "text-slate-400"}`}><Moon className="w-4 h-4" /></button>
-                </div>
-                <button type="button" className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold px-4 py-2 rounded-lg">
-                  <Plus className="w-4 h-4" /> Create Employee
-                </button>
-              </div>
+          {/* Header */}
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <div>
+              <h2 className="text-lg font-medium flex items-center gap-2">
+                Leads
+              </h2>
+              <p className="text-sm text-slate-400 mt-0.5">
+                Dashboard <span className="mx-1">›</span>
+                <span className="text-blue-600 font-medium">Leads</span>
+              </p>
             </div>
+            <div className="flex items-center gap-3">
+              <div className="relative w-64">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
 
-            {/* Sub-header */}
-            <div className="flex flex-wrap items-center justify-between gap-4">
-              <div className="flex items-center gap-4">
-                <p className="text-sm text-slate-500">Grow your business with better insights.</p>
-                <button type="button" className="flex items-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold px-4 py-2 rounded-lg">
-                  View Reports <ArrowRight className="w-4 h-4" />
-                </button>
+                <input
+                    type="text"
+                    placeholder="Search anything..."
+                    className="
+                    w-full
+                    h-11
+                    pl-12
+                    pr-4
+                    rounded-xl
+                    border
+                    border-slate-200
+                    bg-white
+                    text-sm
+                    text-slate-700
+                    placeholder:text-slate-400
+                    focus:outline-none
+                    focus:ring-2
+                    focus:ring-blue-500/20
+                    focus:border-blue-500
+                    "
+                />
+                </div>
+              <button type="button" className="relative p-2.5 rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-50">
+                <Bell className="w-[18px] h-[18px]" />
+                <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-red-500" />
+              </button>
+              <div className="flex items-center bg-slate-100 rounded-full p-1">
+                <button type="button" onClick={() => setTheme("light")} className={`p-1.5 rounded-full ${theme === "light" ? "bg-white shadow text-amber-500" : "text-slate-400"}`}><Sun className="w-4 h-4" /></button>
+                <button type="button" onClick={() => setTheme("dark")}  className={`p-1.5 rounded-full ${theme === "dark"  ? "bg-white shadow text-slate-700" : "text-slate-400"}`}><Moon className="w-4 h-4" /></button>
               </div>
-              <div className="flex items-center gap-2 text-sm font-medium border border-slate-200 rounded-lg px-4 py-2 bg-white">
-                Jul 06, 2026 - Jul 12, 2026 <Calendar className="w-4 h-4 text-slate-400" />
-              </div>
+              <button type="button" className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold px-4 py-2 rounded-lg">
+                <Plus className="w-4 h-4" /> Create Employee
+              </button>
             </div>
+          </div>
 
-            {/* Stat cards */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-              {(stats.length > 0 ? stats : defaultStats).map(item => {
-                const { icon: Icon, bg, color } = iconMap[item.icon] || defaultIconStyle;
-                const neg = typeof item.change === "string" && item.change.trim().startsWith("-");
-                return (
-                  <div key={item.label} className="bg-white border border-slate-200 rounded-2xl p-3 flex items-center justify-between">
-                    <div>
-                      <p className="text-sm text-slate-500">{item.label}</p>
-                      <h2 className="text-2xl font-bold mt-1">{item.value}</h2>
-                      <p className={`text-xs mt-1 ${neg ? "text-red-500" : "text-emerald-600"}`}>{item.change}</p>
-                    </div>
-                    <div className={`w-12 h-12 rounded-full flex items-center justify-center shrink-0 ${bg} ${color}`}>
-                      <Icon className="w-5 h-5" />
-                    </div>
+          {/* Stat cards */}
+          <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
+            {(stats.length > 0 ? stats : defaultStats).map(item => {
+              const { icon: Icon, bg, color } = iconMap[item.icon] || iconMap.total;
+              const trendColor = item.trend === "up" ? "text-emerald-600" : "text-red-500";
+              const arrow = item.trend === "up" ? "↑" : "↓";
+              const labelColor = item.label === "Lost" ? "text-red-600" : "text-slate-800";
+              return (
+                <div key={item.label} className="bg-white border border-slate-200 rounded-2xl p-4 flex items-center gap-4">
+                  <div className={`w-12 h-12 rounded-full flex items-center justify-center shrink-0 ${bg} ${color}`}>
+                    <Icon className="w-5 h-5" />
                   </div>
-                );
-              })}
-            </div>
-
-            {/* Charts */}
-            <div className="bg-white border border-slate-200 rounded-2xl p-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
-              <div className="lg:col-span-2">
-                <div className="flex flex-wrap items-center justify-between gap-3 mb-2">
-                  <h3 className="font-semibold text-md text-slate-800">Lead Overview</h3>
-                  <div className="flex items-center text-xs border border-slate-200 rounded-sm overflow-hidden">
-                    {[{ key:"week",label:"This Week"},{ key:"month",label:"This Month"},{ key:"year",label:"This year"}].map(({ key, label }) => (
-                      <button key={key} type="button" disabled={refreshing} onClick={() => setRange(key)}
-                        className={`px-3 py-1 font-medium disabled:opacity-50 ${range === key ? "bg-blue-50 text-blue-600" : "text-slate-500 hover:bg-slate-50"}`}>
-                        {label}
-                      </button>
-                    ))}
+                  <div>
+                    <p className={`text-sm font-medium ${labelColor}`}>{item.label}</p>
+                    <h2 className="text-2xl font-bold mt-0.5">{item.value}</h2>
+                    <p className={`text-xs mt-1 ${trendColor}`}>{arrow} {item.change}</p>
                   </div>
                 </div>
-                <div className="flex items-center gap-4 text-xs text-slate-500 mb-3">
-                  <span className="flex items-center gap-1.5"><span className="w-3 h-1 rounded-full bg-blue-600" /> New Leads</span>
-                  <span className="flex items-center gap-1.5"><span className="w-3 h-1 rounded-full bg-emerald-600" /> Connected</span>
-                  <span className="flex items-center gap-1.5"><span className="w-3 h-1 rounded-full bg-purple-600" /> Follow-ups</span>
-                  <span className="flex items-center gap-1.5"><span className="w-3 h-1 rounded-full bg-orange-500" /> Converted</span>
-                </div>
-                <div className={`h-74 transition-opacity ${refreshing ? "opacity-50" : ""}`}>
-                  <ResponsiveContainer width="100%" height="100%">
-                    <AreaChart data={chartDisplayData} margin={{ top:10, right:10, left:-20, bottom:0 }}>
-                      <defs>
-                        <linearGradient id="leadFill" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="0%" stopColor="#f97316" stopOpacity={0.35} />
-                          <stop offset="100%" stopColor="#f97316" stopOpacity={0} />
-                        </linearGradient>
-                      </defs>
-                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
-                      <XAxis dataKey="label" tick={{ fontSize:12, fill:"#94a3b8" }} axisLine={false} tickLine={false} />
-                      <YAxis tick={{ fontSize:12, fill:"#94a3b8" }} axisLine={false} tickLine={false} />
-                      <Tooltip />
-                      <Area type="monotone" dataKey="value" stroke="#f97316" strokeWidth={2.5} fill="url(#leadFill)"
-                        dot={{ r:4, fill:"#f97316", strokeWidth:0 }} />
-                    </AreaChart>
-                  </ResponsiveContainer>
-                </div>
-              </div>
+              );
+            })}
+          </div>
 
-              <div>
-                <h3 className="font-semibold text-md text-slate-800 mb-4">Lead Status Distribution</h3>
-                <div className="relative h-44">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <PieChart>
-                      <Pie
-                        data={leadStatus.length > 0 ? leadStatus : [{ label:"empty", value:1, color:"#e2e8f0" }]}
-                        dataKey="value" nameKey="label"
-                        startAngle={90} endAngle={-270}
-                        innerRadius="65%" outerRadius="100%"
-                        paddingAngle={leadStatus.length > 0 ? 2 : 0} strokeWidth={0}
-                      >
-                        {(leadStatus.length > 0 ? leadStatus : [{ label:"empty", color:"#e2e8f0" }]).map(entry => (
-                          <Cell key={entry.label} fill={entry.color} />
+          {/* Table card */}
+          <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden">
+
+            {/* Filter bar */}
+            <div className="flex flex-wrap items-center gap-3 p-4 border-b border-slate-100">
+              <div className="relative flex-1 min-w-[180px]">
+                <Search className="w-4 h-4 text-slate-400 absolute left-8 top-1/2 -translate-y-1/2" />
+                <input type="text" placeholder="Search anything..." value={search}
+                  onChange={e => setSearch(e.target.value)}
+                  className="pl-9 pr-4 py-2 w-56 text-sm rounded-lg border border-slate-200 outline-none focus:border-blue-400" />
+              </div>
+              <FilterSelect label="Status"      value={status} options={STATUS_OPTIONS} onChange={setStatus} />
+              <FilterSelect label="Lead Source" value={source} options={SOURCE_OPTIONS} onChange={setSource} />
+              <div className="relative">
+                <select
+                  value={employeeFilter}
+                  onChange={e => setEmployeeFilter(e.target.value)}
+                  className="appearance-none pl-3 pr-8 py-2 text-sm font-medium border border-slate-200 rounded-lg bg-white text-slate-700 cursor-pointer focus:outline-none focus:border-blue-400"
+                >
+                  {EMPLOYEE_OPTIONS.map(o => <option key={o} value={o}>{o}</option>)}
+                </select>
+                <ChevronDown className="w-4 h-4 text-slate-400 absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none" />
+              </div>
+              <button type="button" className="flex items-center gap-2 px-3 py-2 text-sm rounded-lg border border-slate-200 bg-white text-slate-600">
+                Jul 06,2026 - Jul 12,2026
+                <Calendar className="w-4 h-4 text-slate-400" />
+              </button>
+              <button type="button" className="flex items-center gap-2 px-3 py-2 text-sm rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-50">
+                <ChevronDown className="w-4 h-4 rotate-[-90deg]" /> Export
+              </button>
+              <button
+                type="button"
+                onClick={() => setPage(1)}
+                className="p-2 rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-50"
+              >
+                <Filter className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Table */}
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-slate-100 text-slate-500 text-left">
+                    <th className="px-5 py-3 font-semibold">Lead ID</th>
+                    <th className="px-5 py-3 font-semibold">Customer Name</th>
+                    <th className="px-5 py-3 font-semibold">Mobile Number</th>
+                    <th className="px-5 py-3 font-semibold">Employee Name</th>
+                    <th className="px-5 py-3 font-semibold">Status</th>
+                    <th className="px-5 py-3 font-semibold">Created On</th>
+                    <th className="px-5 py-3 font-semibold">Joined On</th>
+                    <th className="px-5 py-3 font-semibold text-center">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-50">
+                  {loading ? (
+                    Array.from({ length: rowsPerPage }).map((_, i) => (
+                      <tr key={i}>
+                        {Array.from({ length: 8 }).map((_, j) => (
+                          <td key={j} className="px-5 py-4">
+                            <div className="h-4 bg-slate-100 rounded animate-pulse" />
+                          </td>
                         ))}
-                      </Pie>
-                    </PieChart>
-                  </ResponsiveContainer>
-                  <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                    <div className="text-xs text-slate-500">Total Leads</div>
-                    <div className="text-2xl font-bold text-blue-600">{totalLeads}</div>
-                  </div>
-                </div>
-                <div className="space-y-2 mt-4">
-                  {(leadStatus.length > 0 ? leadStatus : defaultLeadStatus).map(item => (
-                    <div key={item.label} className="flex items-center justify-between text-sm">
-                      <span className="flex items-center gap-2 text-slate-600">
-                        <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: item.color }} />
-                        {item.label}
-                      </span>
-                      <span className="font-semibold">{item.value}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
+                      </tr>
+                    ))
+                  ) : filteredLeads.length === 0 ? (
+                    <tr>
+                      <td colSpan={8} className="text-center py-16 text-slate-400">No leads found.</td>
+                    </tr>
+                  ) : (
+                    filteredLeads.map((lead, i) => (
+                      <tr key={lead.leadId || i} className="text-left">
+                        <td className="px-5 py-4 font-medium text-slate-700">{lead.leadId}</td>
+                        <td className="px-5 py-4">
+                          <div className="flex items-center gap-3">
+                            <img
+                              src={`https://i.pravatar.cc/64?u=${lead.leadId}`}
+                              alt={lead.customer || "Customer"}
+                              className="w-9 h-9 rounded-full object-cover shrink-0"
+                            />
+                            <div>
+                              <p className="font-semibold text-slate-800">{lead.customer}</p>
+                              <p className="text-xs text-slate-400">{lead.location}</p>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-5 py-4 text-slate-600">{lead.phone}</td>
+                        <td className="px-5 py-4">
+                          <div className="flex items-center gap-3">
+                            <img
+                              src={`https://i.pravatar.cc/64?u=${
+                                    lead.employee?.name || lead.employee
+                                    }${lead.leadId}`}
+                              alt={lead.employee?.name || lead.employee}
+                              className="w-9 h-9 rounded-full object-cover shrink-0"
+                            />
+                            <div>
+                              <p className="font-medium text-slate-700">{lead.employee?.name || lead.employee}</p>
+                              <p className="text-xs text-slate-400">{lead.email}</p>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-5 py-4">
+                          <span className={`text-xs font-semibold px-3 py-1 rounded-full whitespace-nowrap ${statusStyles[lead.status] || defaultStatusStyle}`}>
+                            {lead.status}
+                          </span>
+                        </td>
+                        <td className="px-5 py-4 text-slate-600">
+                          <div>{lead.createdOn}</div>
+                          <div className="text-xs text-slate-400">{lead.createdTime}</div>
+                        </td>
+                        <td className="px-5 py-4">
+                          <div className={`font-medium ${lead.joinedColor}`}>{lead.joinedLabel}</div>
+                          <div className="text-xs text-slate-400">{lead.joinedTime}</div>
+                        </td>
+                        <td className="px-5 py-4">
+                          <div className="flex items-center justify-center gap-2">
+                            <button type="button" title="View"   className="p-1.5 rounded-lg text-slate-400 hover:text-blue-600   hover:bg-blue-50   transition-colors"><Eye    className="w-4 h-4" /></button>
+                            <button type="button" title="Edit"   className="p-1.5 rounded-lg text-slate-400 hover:text-amber-600  hover:bg-amber-50  transition-colors"><Pencil className="w-4 h-4" /></button>
+                            <button type="button" title="Delete" className="p-1.5 rounded-lg text-slate-400 hover:text-red-600    hover:bg-red-50    transition-colors"><Trash2 className="w-4 h-4" /></button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
             </div>
 
-            {/* Bottom row */}
-            <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-              <div className="bg-white rounded-2xl border border-slate-200 shadow-sm">
-                <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100">
-                  <div>
-                    <h3 className="text-lg font-semibold text-slate-800">Top Performers</h3>
-                    <p className="text-xs text-slate-500">Best performing employees this week</p>
-                  </div>
-                  <button type="button" className="flex items-center gap-1 text-sm text-blue-600 font-medium hover:text-blue-700">
-                    View All <ArrowRight className="w-4 h-4" />
-                  </button>
-                </div>
-                <div className="p-4 space-y-3">
-                  {performers.map((p, i) => (
-                    <div key={p.name + i} className="flex items-center justify-between p-3 rounded-lg hover:bg-slate-50">
-                      <div className="flex items-center gap-4">
-                        <div className={`w-8 h-8 flex items-center justify-center rounded-full font-bold text-sm ${rankColors[i] || defaultRankColor}`}>{i + 1}</div>
-                        <div className="w-11 h-11 rounded-full bg-blue-100 flex items-center justify-center">
-                          <User className="w-5 h-5 text-blue-600" />
-                        </div>
-                        <div>
-                          <h4 className="font-medium text-slate-800">{p.name}</h4>
-                          <p className="text-xs text-slate-500">Leads: {p.leads}</p>
-                        </div>
-                      </div>
-                      <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-700">
-                        {p.pct != null ? `${p.pct}%` : "—"}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div className="bg-white rounded-2xl border border-slate-200 shadow-sm">
-                <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100">
-                  <div>
-                    <h3 className="text-lg font-semibold text-slate-800">Recent Leads</h3>
-                    <p className="text-xs text-slate-500">Latest customer activities</p>
-                  </div>
-                  <button type="button" className="flex items-center gap-1 text-sm text-blue-600 font-medium hover:text-blue-700">
-                    View All <ArrowRight className="w-4 h-4" />
-                  </button>
-                </div>
-                <div className="p-4 space-y-3">
-                  {recentLeads.map((lead, i) => (
-                    <div key={lead.name + i} className="flex items-center justify-between p-3 rounded-lg hover:bg-slate-50 transition">
-                      <div className="flex items-center gap-4 flex-1">
-                        <div className="w-11 h-11 rounded-full bg-slate-100 flex items-center justify-center">
-                          <User className="w-5 h-5 text-slate-600" />
-                        </div>
-                        <div>
-                          <p className="font-semibold text-sm text-slate-800">{lead.name}</p>
-                          <p className="text-xs text-slate-500">{lead.phone}</p>
-                        </div>
-                      </div>
-                      <div className="flex justify-center w-40">
-                        <span className={`text-xs font-semibold px-3 py-1 rounded-full whitespace-nowrap ${statusStyles[lead.status] || defaultStatusStyle}`}>
-                          {lead.status}
-                        </span>
-                      </div>
-                      <div className="w-24 text-right">
-                        <span className="text-xs text-slate-400">{lead.time}</span>
-                      </div>
-                    </div>
-                  ))}
+            {/* Pagination footer */}
+            <div className="flex flex-wrap items-center justify-between gap-4 px-5 py-4 border-t border-slate-100">
+              <p className="text-sm text-slate-500">
+                {total === 0 ? "No leads" : `Showing ${start} to ${end} of ${total} leads`}
+              </p>
+              <Pagination current={page} total={totalPages} onChange={setPage} />
+              <div className="flex items-center gap-2 text-sm text-slate-500">
+                Rows per page:
+                <div className="relative">
+                  <select value={rowsPerPage} onChange={e => setRowsPerPage(Number(e.target.value))}
+                    className="appearance-none pl-2 pr-6 py-1 text-sm border border-slate-200 rounded-lg bg-white text-slate-700 focus:outline-none focus:border-blue-400">
+                    {ROWS_OPTIONS.map(n => <option key={n} value={n}>{n}</option>)}
+                  </select>
+                  <ChevronDown className="w-3 h-3 text-slate-400 absolute right-1.5 top-1/2 -translate-y-1/2 pointer-events-none" />
                 </div>
               </div>
             </div>
           </div>
-        </main>
-      </div>
-    );
-  }
+
+        </div>
+      </main>
+    </div>
+  );
+}
