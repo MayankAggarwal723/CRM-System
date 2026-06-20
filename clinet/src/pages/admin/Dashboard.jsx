@@ -1,4 +1,4 @@
-  import { useState, useEffect, useRef } from "react";
+  import { useState, useEffect, } from "react";
   import { Link, useLocation } from "react-router-dom";
   import {
     LayoutGrid, Users, Flag, Phone, LogIn, FileText, Settings, Search, Calendar, Bell,
@@ -177,52 +177,59 @@
     const [range,      setRange]      = useState("week");
     const [theme,      setTheme]      = useState("light");
     const [admin,      setAdmin]      = useState({});
-    const [stats,      setStats]      = useState([]);
-    const [performers, setPerformers] = useState([]);
-    const [recentLeads,setRecentLeads]= useState([]);
-    const [leadStatus, setLeadStatus] = useState([]);
-    const [chartData,  setChartData]  = useState([]);
-    const [loading,    setLoading]    = useState(true);
+    const [stats, setStats] = useState(defaultStats);
+
+    const [performers, setPerformers] = useState([
+      {
+        name: "No Data",
+        leads: 0,
+        pct: 0,
+      },
+    ]);
+
+    const [recentLeads, setRecentLeads] = useState([
+      {
+        name: "No Leads Yet",
+        phone: "-",
+        status: "New",
+        time: "-",
+      },
+    ]);
+
+    const [leadStatus, setLeadStatus] = useState(defaultLeadStatus);
+
+    const [chartData, setChartData] = useState(chartSkeleton.week);
     const [refreshing, setRefreshing] = useState(false);
     const [error,      setError]      = useState(null);
-    const isFirstLoad = useRef(true);
 
     useEffect(() => {
-      const load = async () => {
-        if (isFirstLoad.current) setLoading(true);
-        else setRefreshing(true);
-        try {
-          const data = await getDashboardData(range);
-          setAdmin(data.admin        || {});
-          setStats(data.stats        || []);
-          setPerformers(data.performers   || []);
-          setRecentLeads(data.recentLeads || []);
-          setLeadStatus(data.leadStatus   || []);
-          setChartData(data.chartData     || []);
-          setError(null);
-        } catch (err) {
-          console.error("Dashboard API Error:", err);
-          setError("Couldn't load dashboard data. Please try again.");
-        } finally {
-          setLoading(false);
-          setRefreshing(false);
-          isFirstLoad.current = false;
-        }
-      };
-      load();
-    }, [range]);
+  const load = async () => {
+    setRefreshing(true);
+
+    try {
+      const data = await getDashboardData(range);
+
+      setAdmin(data.admin || {});
+      setStats(data.stats || []);
+      setPerformers(data.performers || []);
+      setRecentLeads(data.recentLeads || []);
+      setLeadStatus(data.leadStatus || []);
+      setChartData(data.chartData || []);
+      setError(null);
+    } catch (err) {
+      console.error("Dashboard API Error:", err);
+      setError("Couldn't load dashboard data. Please try again.");
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
+  load();
+}, [range]);
 
     const totalLeads = leadStatus.reduce((sum, item) => sum + item.value, 0);
     const hasChartData = chartData.length > 0 && chartData.some(d => Number(d.value) > 0);
     const chartDisplayData = hasChartData ? chartData : (chartSkeleton[range] || chartSkeleton.week);
-
-    if (loading) {
-      return (
-        <div className="h-screen flex items-center justify-center">
-          <div className="text-lg font-semibold text-slate-600">Loading Dashboard...</div>
-        </div>
-      );
-    }
 
     return (
       <div className="min-h-screen flex bg-slate-50 text-slate-900">
