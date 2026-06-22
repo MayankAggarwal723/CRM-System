@@ -3,7 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 import {
   LayoutGrid, Users, Flag, Phone, LogIn, FileText, Settings, Search, Calendar, Bell,
   Sun, Moon, Plus, ChevronDown, ChevronLeft, ChevronRight,
-  Eye, Pencil, Trash2, Filter, User, LogOut, CheckCircle2, XCircle,
+  Eye, Trash2, Filter, User, LogOut, CheckCircle2, XCircle,
 } from "lucide-react";
 
 // ─── shared nav (same paths as Dashboard / Employee) ───────────────────────
@@ -480,7 +480,6 @@ export default function Lead() {
                     <th className="px-5 py-3 font-semibold">Employee Name</th>
                     <th className="px-5 py-3 font-semibold">Status</th>
                     <th className="px-5 py-3 font-semibold">Created On</th>
-                    <th className="px-5 py-3 font-semibold">Joined On</th>
                     <th className="px-5 py-3 font-semibold text-center">Actions</th>
                   </tr>
                 </thead>
@@ -548,7 +547,6 @@ export default function Lead() {
                         <td className="px-5 py-4">
                           <div className="flex items-center justify-center gap-2">
                             <button type="button" title="View"   className="p-1.5 rounded-lg text-slate-400 hover:text-blue-600   hover:bg-blue-50   transition-colors"><Eye    className="w-4 h-4" /></button>
-                            <button type="button" title="Edit"   className="p-1.5 rounded-lg text-slate-400 hover:text-amber-600  hover:bg-amber-50  transition-colors"><Pencil className="w-4 h-4" /></button>
                             <button type="button" title="Delete" className="p-1.5 rounded-lg text-slate-400 hover:text-red-600    hover:bg-red-50    transition-colors"><Trash2 className="w-4 h-4" /></button>
                           </div>
                         </td>
