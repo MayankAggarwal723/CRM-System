@@ -4,7 +4,9 @@ import AdminDashboard from "./pages/admin/Dashboard";
 import Employee from "./pages/admin/Employee";
 import Lead from "./pages/admin/Lead";
 import Logs from "./pages/admin/Logs";
-import ComingSoon from "./pages/admin/ComingSoon";
+import Settings from "./pages/admin/Settings";
+import Tasks from "./pages/admin/Tasks";
+import CreateEmployee from "./pages/admin/CreateEmployee";
 import EmployeeDashboard from "./pages/employees/EmployeeDashboard";
 
 function App() {
@@ -14,13 +16,12 @@ function App() {
         <Route path="/" element={<Login />} />
 
         <Route path="/admin/dashboard" element={<AdminDashboard />} />
-        <Route path="/admin/employee" element={<Employee />} />
-        <Route path="/admin/leads" element={<Lead />} />   {/* ← fixed: plural, matches navItems */}
-        <Route path="/admin/calls" element={<ComingSoon title="Call Details" />} />
-        <Route path="/admin/logs" element={<Logs />} />
-        <Route path="/admin/tasks" element={<ComingSoon title="Task & Follow-ups" />} />
-        <Route path="/admin/settings" element={<ComingSoon title="Settings" />} />
-
+        <Route path="/admin/employee"  element={<Employee />} />
+        <Route path="/admin/leads"     element={<Lead />} />
+        <Route path="/admin/logs"      element={<Logs />} />
+        <Route path="/admin/settings"  element={<Settings />} />
+        <Route path="/admin/tasks"     element={<Tasks />} />
+        <Route path="/admin/CreateEmployee" element={<CreateEmployee />} />
         <Route path="/employees/dashboard" element={<EmployeeDashboard />} />
 
         <Route path="*" element={<Navigate to="/" replace />} />

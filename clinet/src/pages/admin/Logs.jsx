@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
 import {
-  LayoutGrid, Users, Flag, Phone, LogIn, FileText, Settings, Search, Calendar, Bell,
+  LayoutGrid, Users, Flag, LogIn, FileText, Settings, Search, Calendar, Bell,
   Sun, Moon, Plus, ChevronDown, ChevronLeft, ChevronRight,
   Filter, User, LogOut, Wifi, Clock,
 } from "lucide-react";
@@ -12,10 +12,10 @@ const navItems = [
   { label: "Dashboard",           icon: LayoutGrid, path: "/admin/dashboard" },
   { label: "Employees",           icon: Users,      path: "/admin/employee"  },
   { label: "Leads",               icon: Flag,       path: "/admin/leads"     },
-  { label: "Call Details",        icon: Phone,      path: "/admin/calls"     },
   { label: "Login / Logout Logs", icon: LogIn,      path: "/admin/logs"      },
   { label: "Task & Follow-ups",   icon: FileText,   path: "/admin/tasks"     },
   { label: "Settings",            icon: Settings,   path: "/admin/settings"  },
+  { label: "Create Employee",     icon: Plus,       path: "/admin/CreateEmployee" },
 ];
 
 // ─── stat cards config ────────────────────────────────────────────────────────
