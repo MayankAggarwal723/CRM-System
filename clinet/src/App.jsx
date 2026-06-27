@@ -7,7 +7,9 @@ import Logs from "./pages/admin/Logs";
 import Settings from "./pages/admin/Settings";
 import Tasks from "./pages/admin/Tasks";
 import CreateEmployee from "./pages/admin/CreateEmployee";
+
 import EmployeeDashboard from "./pages/employees/EmployeeDashboard";
+
 
 function App() {
   return (
@@ -22,6 +24,7 @@ function App() {
         <Route path="/admin/settings"  element={<Settings />} />
         <Route path="/admin/tasks"     element={<Tasks />} />
         <Route path="/admin/CreateEmployee" element={<CreateEmployee />} />
+
         <Route path="/employees/dashboard" element={<EmployeeDashboard />} />
 
         <Route path="*" element={<Navigate to="/" replace />} />

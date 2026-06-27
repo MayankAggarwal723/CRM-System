@@ -10,7 +10,8 @@ import { getEmployeeDashboard } from "../../services/employeeDashboardService";
 
 // ─── constants ────────────────────────────────────────────────────────────────
 const NAV_ITEMS = [
-  { label: "My Tasks",       icon: ClipboardList, path: "/employee/tasks"     },
+  { label: "Dashboard",      icon: LayoutDashboard, path:" /employee/EmployeeDashboard"},
+  { label: "My Tasks",       icon: ClipboardList, path: "/employee/EmployeeTasks" },
   { label: "Schedule",       icon: Calendar,      path: "/employee/schedule"  },
   { label: "Activities",     icon: Activity,      path: "/employee/activities"},
   { label: "Calendar",       icon: CalendarDays,  path: "/employee/calendar"  },
@@ -63,7 +64,7 @@ function SummaryCard({ title, value, subtitle, linkLabel, linkColor, iconBg, ico
       <div className="flex items-start justify-between">
         <div className="text-left">
           <p className="text-sm font-medium text-slate-500">{title}</p>
-          <h2 className="text-4xl font-bold text-slate-800 mt-1">{String(value).padStart(2, "0")}</h2>
+          <h2 className="text-4xl font-semibold text-slate-700 mt-1">{String(value).padStart(2, "0")}</h2>
           <p className="text-xs text-slate-400 mt-1">{subtitle}</p>
         </div>
         <div className={`w-12 h-12 rounded-xl ${iconBg} flex items-center justify-center shrink-0`}>
@@ -147,19 +148,6 @@ function Sidebar({ collapsed, employee, activeNav, setActiveNav, navigate }) {
 
       <div className="flex-1 overflow-y-auto px-3 py-4">
         <div className="space-y-0.5">
-          <button
-            type="button"
-            onClick={() => setActiveNav("Dashboard")}
-            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all ${
-              activeNav === "Dashboard"
-                ? "bg-blue-50 text-blue-600 border-l-4 border-blue-600"
-                : "text-slate-600 hover:bg-slate-50"
-            }`}
-          >
-            <LayoutDashboard className="w-4 h-4 shrink-0" />
-            <span>Dashboard</span>
-          </button>
-
           {NAV_ITEMS.map(item => {
             const Icon = item.icon;
             const active = activeNav === item.label;
@@ -285,7 +273,7 @@ export default function EmployeeDashboard() {
         <div className="p-5 space-y-5 max-w-[1400px]">
 
           {error && (
-            <div className="bg-red-50 text-red-700 text-sm rounded-xl px-4 py-3 border border-red-100">{error}</div>
+            <div className="bg-red-50 text-red-700 text-xs rounded-xl px-4 py-3 border border-red-100">{error}</div>
           )}
 
           {/* ── Welcome ─────────────────────────────────────────────────── */}
@@ -334,7 +322,7 @@ export default function EmployeeDashboard() {
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
                   <CalendarDays className="w-4 h-4 text-slate-500" />
-                  <h3 className="text-sm font-bold text-slate-800">Today's Schedule</h3>
+                  <h3 className="text-sm font-semibold text-slate-800">Today's Schedule</h3>
                 </div>
                 <button type="button" className="text-xs font-semibold text-blue-600 hover:text-blue-700">View All</button>
               </div>
@@ -360,7 +348,7 @@ export default function EmployeeDashboard() {
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
                   <Clock className="w-4 h-4 text-slate-500" />
-                  <h3 className="text-sm font-bold text-slate-800">Upcoming Schedule</h3>
+                  <h3 className="text-sm font-Semibold text-slate-800">Upcoming Schedule</h3>
                 </div>
                 <button type="button" className="text-xs font-semibold text-blue-600 hover:text-blue-700">View All</button>
               </div>
@@ -390,7 +378,7 @@ export default function EmployeeDashboard() {
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
                   <Activity className="w-4 h-4 text-slate-500" />
-                  <h3 className="text-sm font-bold text-slate-800">Recent Activity</h3>
+                  <h3 className="text-sm font-Semibold text-slate-800">Recent Activity</h3>
                 </div>
                 <button type="button" className="text-xs font-semibold text-blue-600 hover:text-blue-700">View All</button>
               </div>
@@ -411,7 +399,7 @@ export default function EmployeeDashboard() {
           <div className="bg-white rounded-[18px] border border-gray-200 shadow-sm p-5">
             <div className="flex items-center gap-2 mb-4">
               <Link2 className="w-4 h-4 text-slate-500" />
-              <h3 className="text-sm font-bold text-slate-800">Quick Links</h3>
+              <h3 className="text-sm font-Semibold text-slate-800">Quick Links</h3>
             </div>
             <div className="grid grid-cols-4 sm:grid-cols-6 lg:grid-cols-9 gap-3">
               {QUICK_LINK_STYLES.map(link => (
@@ -427,7 +415,7 @@ export default function EmployeeDashboard() {
             <div className="w-5 h-5 rounded-full border-2 border-white/60 flex items-center justify-center shrink-0">
               <span className="text-white text-[10px] font-bold">i</span>
             </div>
-            <p className="text-sm text-white font-medium">
+            <p className="text-sm text-white font-small">
               All your tasks and schedules are updated in real-time. Stay organized and productive!
             </p>
           </div>
