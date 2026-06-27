@@ -1,7 +1,7 @@
 import { useState, useRef } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
-  LayoutGrid, Users, Flag, Phone, LogIn, FileText, Settings,
+  LayoutGrid, Users, Flag, LogIn, FileText, Settings,
   Search, Calendar, Bell, Sun, Moon, Plus, User, LogOut,
   Upload, Eye, EyeOff, ChevronDown, Info,
 } from "lucide-react";
@@ -11,10 +11,10 @@ const navItems = [
   { label: "Dashboard",           icon: LayoutGrid, path: "/admin/dashboard" },
   { label: "Employees",           icon: Users,      path: "/admin/employee"  },
   { label: "Leads",               icon: Flag,       path: "/admin/leads"     },
-  { label: "Call Details",        icon: Phone,      path: "/admin/calls"     },
   { label: "Login / Logout Logs", icon: LogIn,      path: "/admin/logs"      },
   { label: "Task & Follow-ups",   icon: FileText,   path: "/admin/tasks"     },
-  { label: "Settings",            icon: Settings,   path: "/admin/settings"  },
+  { label: "Create Employee",     icon: Plus,       path: "/admin/CreateEmployee" },
+  { label: "Settings",            icon: Settings,   path: "/admin/settings"  }
 ];
 
 // ─── section header ───────────────────────────────────────────────────────────
@@ -84,52 +84,50 @@ function DocUpload({ label, required }) {
 // ─── sidebar ──────────────────────────────────────────────────────────────────
 function Sidebar() {
   const location = useLocation();
-  const navigate = useNavigate();
   return (
-    <aside className="fixed left-0 top-0 h-screen w-[190px] bg-white border-r border-slate-200 flex flex-col z-50">
-      <div className="h-[55px] px-6 flex items-center border-b border-slate-100">
-        <img src="/logo.png" alt="Logo" className="h-8 object-contain" />
-      </div>
-      <div className="flex-1 px-1 py-5 overflow-y-auto">
-        <nav className="space-y-2">
-          {navItems.map(({ label, icon: Icon, path }) => {
-            const active = location.pathname === path;
-            return (
-              <Link key={label} to={path}
-                className={`flex items-center h-8 px-2 rounded-lg text-xs font-medium transition-all ${active ? "bg-blue-600 text-white shadow-md" : "text-slate-600 hover:bg-slate-100"}`}>
-                <Icon className="w-4 h-4 shrink-0" />
-                <span className="ml-2">{label}</span>
-              </Link>
-            );
-          })}
-        </nav>
-
-        {/* Create Employee button */}
-        <button
-          type="button"
-          onClick={() => navigate("/admin/employee/add")}
-          className="mt-4 w-full flex items-center gap-2 px-2 py-2 rounded-lg text-xs font-medium bg-blue-600 hover:bg-blue-700 text-white transition-all"
-        >
-          <Plus className="w-4 h-4 shrink-0" />
-          <span>Create Employee</span>
-        </button>
-      </div>
-      <div className="border-t border-slate-100 p-4">
-        <div className="flex items-center gap-3 mb-4">
-          <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
-            <User className="w-5 h-5 text-blue-600" />
+        <aside className="fixed left-0 top-0 h-screen w-[190px] bg-white border-r border-slate-200 flex flex-col z-50">
+          <div className="h-[55px] px-6 flex items-center border-b border-slate-100">
+            <img src="/logo.png" alt="Logo" className="h-8 object-contain" />
           </div>
-          <div className="text-left">
-            <h4 className="text-sm font-semibold text-slate-800">Admin User</h4>
-            <p className="text-xs text-slate-500">Super Admin</p>
+          <div className="flex-1 px-1 py-5 overflow-y-auto">
+            <nav className="space-y-2">
+              {navItems.map(({ label, icon: Icon, path }) => {
+                const active = location.pathname === path;
+                return (
+                  <Link
+                    key={label}
+                    to={path}
+                    className={`
+                      flex items-center h-8 px-2 rounded-lg text-xs font-medium transition-all
+                      ${active ? "bg-blue-600 text-white shadow-md" : "text-slate-600 hover:bg-slate-100"}
+                    `}
+                  >
+                    <Icon className="w-4 h-4 shrink-0" />
+                    <span className="ml-2">{label}</span>
+                  </Link>
+                );
+              })}
+            </nav>
           </div>
-        </div>
-        <button type="button"
-          className="w-full h-8 bg-red-500 hover:bg-red-600 text-white rounded-lg text-xs font-medium flex items-center justify-center gap-2 transition-all">
-          <LogOut className="w-4 h-4" /> Logout
-        </button>
-      </div>
-    </aside>
+          <div className="border-t border-slate-100 p-4">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
+                <User className="w-5 h-5 text-blue-600" />
+              </div>
+              <div>
+                <h4 className="text-sm font-semibold text-slate-800">Admin</h4>
+                <p className="text-xs text-slate-500">Super Admin</p>
+              </div>
+            </div>
+            <button
+              type="button"
+              className="w-full h-8 bg-red-500 hover:bg-red-600 text-white rounded-lg text-xs font-medium flex items-center justify-center gap-2 transition-all"
+            >
+              <LogOut className="w-4 h-4" />
+              Logout
+            </button>
+          </div>
+        </aside>
   );
 }
 
@@ -375,7 +373,7 @@ export default function AddEmployee() {
 
           {/* ── 3. Login Credentials ─────────────────────────────────────── */}
           <div className="bg-white border border-slate-200 rounded-2xl p-6">
-            <SectionHeader number={<Lock />} title="Login Credentials" color="bg-purple-100" />
+            <SectionHeader number="3" title="Login Credentials" color="bg-purple-400" />
             <div className="grid grid-cols-3 gap-4">
               <Field label="Employee ID (Login)" required>
                 <input type="text" value={loginId} onChange={e => setLoginId(e.target.value)}

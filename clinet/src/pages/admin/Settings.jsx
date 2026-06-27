@@ -13,8 +13,8 @@ const navItems = [
   { label: "Leads",               icon: Flag,       path: "/admin/leads"     },
   { label: "Login / Logout Logs", icon: LogIn,      path: "/admin/logs"      },
   { label: "Task & Follow-ups",   icon: FileText,   path: "/admin/tasks"     },
-  { label: "Settings",            icon: Settings,   path: "/admin/settings"  },
   { label: "Create Employee",     icon: Plus,       path: "/admin/CreateEmployee" },
+  { label: "Settings",            icon: Settings,   path: "/admin/settings"  },
 ];
 
 // ─── reusable field components ────────────────────────────────────────────────
@@ -180,7 +180,7 @@ export default function SettingsPage() {
           {/* Header */}
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div>
-              <h2 className="text-lg font-medium text-left">Settings</h2>
+              <h2 className="text-lg font-bold text-left">Settings</h2>
               <p className="text-sm text-slate-400 mt-0.5">
                 Dashboard <span className="mx-1">›</span>
                 <span className="text-blue-600 font-medium">Settings</span>

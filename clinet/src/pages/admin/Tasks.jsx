@@ -13,8 +13,8 @@ const navItems = [
   { label: "Leads",               icon: Flag,       path: "/admin/leads"     },
   { label: "Login / Logout Logs", icon: LogIn,      path: "/admin/logs"      },
   { label: "Task & Follow-ups",   icon: FileText,   path: "/admin/tasks"     },
-  { label: "Settings",            icon: Settings,   path: "/admin/settings"  },
   { label: "Create Employee",     icon: Plus,       path: "/admin/CreateEmployee" },
+  { label: "Settings",            icon: Settings,   path: "/admin/settings"  },
 ];
 
 // ─── mock data ────────────────────────────────────────────────────────────────
@@ -458,6 +458,17 @@ export default function Tasks() {
               </p>
             </div>
             <div className="flex items-center gap-3">
+               <div className="relative">
+                <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                <input
+                  type="text"
+                  placeholder="Search anything..."
+                  className="pl-9 pr-4 py-2 w-56 text-sm rounded-lg border border-slate-200 outline-none focus:border-blue-400 bg-white"
+                />
+              </div>
+              <button type="button" className="p-2.5 rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-50">
+                <Calendar className="w-[18px] h-[18px]" />
+              </button>
               <button type="button" className="relative p-2.5 rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-50">
                 <Bell className="w-[18px] h-[18px]" />
                 <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-red-500 text-white text-[10px] flex items-center justify-center font-bold">3</span>

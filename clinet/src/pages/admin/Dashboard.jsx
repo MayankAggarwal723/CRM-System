@@ -17,8 +17,8 @@
     { label: "Leads",               icon: Flag,       path: "/admin/lead"     },
     { label: "Login / Logout Logs", icon: LogIn,      path: "/admin/logs"      },
     { label: "Task & Follow-ups",   icon: FileText,   path: "/admin/tasks"     },
-    { label: "Settings",            icon: Settings,   path: "/admin/settings"  },
     { label: "Create Employee",     icon: Plus,       path: "/admin/CreateEmployee" },
+    { label: "Settings",            icon: Settings,   path: "/admin/settings"  },
   ];
 
   // ─── stat icon map ──────────────────────────────────────────────────────────
@@ -244,7 +244,7 @@
             {/* Header */}
             <div className="flex flex-wrap items-center justify-between gap-4">
               <div>
-                <h2 className="text-lg font-medium flex items-center gap-2">
+                <h2 className="text-lg font-bold flex items-center gap-2">
                   Welcome back, {admin.name || "Admin"}! <span>👋</span>
                 </h2>
                 <p className="text-sm text-slate-500 mt-0.5">
