@@ -10,7 +10,7 @@ import { getMyTasksData, updateTask } from "../../services/Employee_Tasks";
 
 // ─── nav ──────────────────────────────────────────────────────────────────────
 const NAV_ITEMS = [
-  { label: "Dashboard",      icon: LayoutDashboard, path:" /employee/EmployeeDashboard"},
+  { label: "Dashboard",      icon: LayoutDashboard, path:"/employees/dashboard"},
   { label: "My Tasks",       icon: ClipboardList, path: "/employee/EmployeeTasks"     },
   { label: "Schedule",       icon: Calendar,      path: "/employee/schedule"  },
   { label: "Activities",     icon: Activity,      path: "/employee/activities"},
@@ -101,21 +101,17 @@ function Sidebar({ collapsed, employee, activeNav, setActiveNav, navigate }) {
 }
 
 // ─── header ───────────────────────────────────────────────────────────────────
-function Header({ collapsed, setCollapsed, employee }) {
+function Header({ collapsed,employee }) {
   return (
     <header className={`fixed top-0 right-0 h-[60px] bg-white border-b border-gray-200 flex items-center gap-4 px-5 z-30 transition-all duration-300 ${collapsed ? "left-0" : "left-[200px]"}`}>
-      <button type="button" onClick={() => setCollapsed(!collapsed)}
-        className="p-2 rounded-lg hover:bg-slate-100 text-slate-500 shrink-0">
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-        </svg>
-      </button>
       <div className="flex-1 flex justify-center">
-        <div className="relative w-full max-w-lg">
+        <div className="relative w-full max-w-md">
           <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
           <input type="text" placeholder="Search anything..."
             className="w-full pl-9 pr-20 py-2 text-sm border border-slate-200 rounded-xl outline-none focus:border-blue-400 bg-slate-50 placeholder-slate-400" />
-          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-slate-400 bg-white border border-slate-200 rounded px-1.5 py-0.5">Ctrl + /</span>
+          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-slate-400 bg-white border border-slate-200 rounded px-1.5 py-0.5">
+            Ctrl + /
+          </span>
         </div>
       </div>
       <div className="flex items-center gap-3 shrink-0">
@@ -177,7 +173,7 @@ function TaskDetailPanel({ task, onClose, onSave }) {
       <div className="fixed inset-0 bg-black/10 z-40" onClick={onClose} />
 
       {/* Panel */}
-      <div className="fixed top-0 right-0 h-screen w-[320px] bg-white border-l border-gray-200 z-50 flex flex-col shadow-2xl">
+      <div className="fixed top-0 right-0 h-screen w-[425px] bg-white border-l border-gray-200 z-50 flex flex-col text-left">
 
         {/* Panel header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 shrink-0">
@@ -231,13 +227,13 @@ function TaskDetailPanel({ task, onClose, onSave }) {
                     { label: "Assigned By",  value: task.assignedBy },
                     { label: "Department",   value: task.department },
                   ].map(({ label, value }) => (
-                    <div key={label} className="flex gap-2 text-sm">
+                    <div key={label} className="flex gap-10 text-sm">
                       <span className="text-slate-400 w-28 shrink-0">{label}</span>
                       <span className="font-semibold text-slate-800 text-left">{value}</span>
                     </div>
                   ))}
 
-                  <div className="flex gap-2 text-sm items-center">
+                  <div className="flex gap-10 text-sm items-center">
                     <span className="text-slate-400 w-28 shrink-0">Priority</span>
                     <span className={`text-xs font-semibold px-2.5 py-0.5 rounded-full ${PRIORITY_STYLES[task.priority]}`}>
                       {task.priority}
@@ -248,13 +244,13 @@ function TaskDetailPanel({ task, onClose, onSave }) {
                     { label: "Created Date", value: task.createdDate },
                     { label: "Due Date",     value: task.dueDate },
                   ].map(({ label, value }) => (
-                    <div key={label} className="flex gap-2 text-sm">
+                    <div key={label} className="flex gap-10 text-sm">
                       <span className="text-slate-400 w-28 shrink-0">{label}</span>
                       <span className="font-semibold text-slate-800">{value}</span>
                     </div>
                   ))}
 
-                  <div className="flex gap-2 text-sm">
+                  <div className="flex gap-10 text-sm">
                     <span className="text-slate-400 w-28 shrink-0">Description</span>
                     <span className="text-slate-600 text-xs leading-relaxed text-left">{task.description}</span>
                   </div>
@@ -452,7 +448,7 @@ export default function MyTasks() {
           {/* Title + filters */}
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div className="text-left">
-              <h1 className="text-2xl font-bold text-slate-800">My Tasks</h1>
+              <h2 className="text-2xl font-bold text-slate-800">My Tasks</h2>
               <p className="text-sm text-slate-400 mt-0.5">View and update your assigned tasks.</p>
             </div>
             <div className="flex flex-wrap items-center gap-2">

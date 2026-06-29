@@ -10,7 +10,7 @@ import { getEmployeeDashboard } from "../../services/employeeDashboardService";
 
 // ─── constants ────────────────────────────────────────────────────────────────
 const NAV_ITEMS = [
-  { label: "Dashboard",      icon: LayoutDashboard, path:" /employee/EmployeeDashboard"},
+  { label: "Dashboard",      icon: LayoutDashboard, path:"/employee/EmployeeDashboard"},
   { label: "My Tasks",       icon: ClipboardList, path: "/employee/EmployeeTasks" },
   { label: "Schedule",       icon: Calendar,      path: "/employee/schedule"  },
   { label: "Activities",     icon: Activity,      path: "/employee/activities"},
@@ -142,7 +142,7 @@ function QuickLinkButton({ title, icon: Icon, iconBg, iconColor, onClick }) {
 function Sidebar({ collapsed, employee, activeNav, setActiveNav, navigate }) {
   return (
     <aside className={`fixed left-0 top-0 h-screen bg-white border-r border-gray-200 flex flex-col z-40 transition-all duration-300 ${collapsed ? "w-0 overflow-hidden" : "w-[200px]"}`}>
-      <div className="h-[55px] px-6 flex items-center border-b border-slate-100 shrink-0">
+      <div className="h-[60px] px-5 flex items-center border-b border-slate-100 shrink-0">
         <img src="/logo.png" alt="Logo" className="h-8 object-contain" />
       </div>
 
@@ -245,7 +245,7 @@ export default function EmployeeDashboard() {
         if (isActive) { setData(res); setError(null); }
       } catch (err) {
         console.error("Employee dashboard error:", err);
-        if (isActive) setError("Couldn't load dashboard. Please try again.");
+        if (isActive) setError(null);
       }
     };
     load();
