@@ -6,7 +6,7 @@ import {
   User, CheckCircle2, AlertCircle, Clock, Eye, X, Trash2,
   RefreshCcw, ChevronLeft, ChevronRight, Plus,
 } from "lucide-react";
-import { getMyTasksData, updateTask } from "../../services/EmployeeTasks";
+import { getMyTasksData, updateTask } from "../../services/Employee_Tasks";
 
 // ─── nav ──────────────────────────────────────────────────────────────────────
 const NAV_ITEMS = [

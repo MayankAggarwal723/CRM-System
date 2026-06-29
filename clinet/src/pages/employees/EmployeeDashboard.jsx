@@ -37,7 +37,7 @@ const ACTIVITY_ICON_STYLES = {
 };
 
 const QUICK_LINK_STYLES = [
-  { title: "My Tasks",  icon: ClipboardList, iconBg: "bg-indigo-100", iconColor: "text-indigo-600", path: "/employee/tasks"     },
+  { title: "My Tasks",  icon: ClipboardList, iconBg: "bg-indigo-100", iconColor: "text-indigo-600", path: "/employee/EmployeeTasks"     },
   { title: "Schedule",  icon: CalendarDays,  iconBg: "bg-purple-100", iconColor: "text-purple-600", path: "/employee/schedule"  },
   { title: "Projects",  icon: FolderOpen,    iconBg: "bg-green-100",  iconColor: "text-green-600",  path: "/employee/projects"  },
   { title: "Timesheet", icon: Clock,         iconBg: "bg-orange-100", iconColor: "text-orange-500", path: "/employee/timesheet" },

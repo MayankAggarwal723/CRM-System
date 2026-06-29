@@ -9,7 +9,7 @@ import Tasks from "./pages/admin/Tasks";
 import CreateEmployee from "./pages/admin/CreateEmployee";
 
 import EmployeeDashboard from "./pages/employees/EmployeeDashboard";
-
+import EmployeeTasks from "./pages/employees/EmployeeTasks";
 
 function App() {
   return (
@@ -26,6 +26,7 @@ function App() {
         <Route path="/admin/CreateEmployee" element={<CreateEmployee />} />
 
         <Route path="/employees/dashboard" element={<EmployeeDashboard />} />
+        <Route path="/employees/EmployeeTasks" element={<EmployeeTasks />} />
 
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
